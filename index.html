@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy New Year 2026 – Anh vẫn chờ em</title>
+
+    <style>
+        :root {
+            --pink: #ffd1dc;
+            --pink2: #ff7aa8;
+            --bg: #12070f;
+            --text: #fff7fb;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            font-family: "Segoe UI", system-ui, sans-serif;
+            background: radial-gradient(circle at top, var(--pink2), var(--bg));
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        /* FIREWORKS */
+        #fireworks {
+            position: fixed;
+            inset: 0;
+            z-index: 0
+        }
+
+        /* TITLE */
+        .title-fixed {
+            position: fixed;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 6;
+            font-size: 36px;
+            letter-spacing: 2px;
+            font-weight: 700;
+            color: #fff;
+            text-shadow:
+                0 0 12px rgba(255, 209, 220, .9),
+                0 0 28px rgba(255, 122, 168, .7),
+                0 0 60px rgba(255, 122, 168, .45);
+            pointer-events: none;
+        }
+
+        /* COVER */
+        .cover {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .cover-box {
+            max-width: 460px;
+            padding: 46px 38px;
+            border-radius: 34px;
+            background: rgba(255, 255, 255, .16);
+            border: 1px solid rgba(255, 255, 255, .25);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 30px 100px rgba(255, 122, 168, .45);
+        }
+
+        .cover p {
+            opacity: .85;
+            line-height: 1.8
+        }
+
+        .open-btn {
+            margin-top: 28px;
+            padding: 14px 32px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .3);
+            background: linear-gradient(180deg, #ff9cbc, #ff6f9f);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* POPUP */
+        .popup {
+            position: fixed;
+            inset: 0;
+            background: rgba(18, 7, 15, .9);
+            display: none;
+            z-index: 5;
+        }
+
+        .popup.active {
+            display: flex
+        }
+
+        /* STAGE */
+        .stage {
+            position: relative;
+            margin: auto;
+            width: 92%;
+            max-width: 420px;
+            aspect-ratio: 3/4;
+            border-radius: 34px;
+            overflow: hidden;
+        }
+
+        .stage img {
+            width: 110%;
+            height: 110%;
+            object-fit: cover;
+            transform: translate(-5%, -5%);
+            animation: float 18s ease-in-out infinite alternate;
+        }
+
+        @keyframes float {
+            from {
+                transform: translate(-5%, -5%) scale(1)
+            }
+
+            to {
+                transform: translate(-2%, -8%) scale(1.05)
+            }
+        }
+
+        /* PETALS */
+        .petal {
+            position: absolute;
+            top: -40px;
+            font-size: 18px;
+            opacity: .65;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(120vh) rotate(360deg)
+            }
+        }
+
+        /* SUBTITLE */
+        .subtitle {
+            position: absolute;
+            left: 50%;
+            bottom: 10%;
+            transform: translateX(-50%);
+            max-width: 88%;
+            padding: 14px 18px;
+            border-radius: 18px;
+            background: rgba(0, 0, 0, .55);
+            backdrop-filter: blur(8px);
+            font-size: 16px;
+            line-height: 1.8;
+            text-align: center;
+            opacity: 0;
+            filter: blur(6px);
+            transition: .8s;
+        }
+
+        .subtitle.show {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateX(-50%) scale(1.02);
+        }
+
+        .caret {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background: #fff;
+            margin-left: 4px;
+            animation: blink 1s steps(1) infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0
+            }
+        }
+
+        audio {
+            display: none
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="fireworks"></canvas>
+    <div class="title-fixed">HAPPY NEW YEAR 2026</div>
+
+    <div class="cover">
+        <div class="cover-box">
+            <p>
+                2025 có lẽ đã làm em mệt mỏi.<br>
+                Anh muốn nói vài điều…<br>
+                theo cách chậm rãi nhất.
+            </p>
+            <button class="open-btn" onclick="openCard()">Mở thiệp 🎬</button>
+        </div>
+    </div>
+
+    <div class="popup" id="popup">
+        <div class="stage" id="stage">
+            <img src="z7354421744919_031aac0efe54eace25a71493b5154129.jpg">
+            <div class="subtitle" id="subtitle">
+                <span id="text"></span><span class="caret" id="caret"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎵 AUDIO -->
+    <audio id="musicBg" src="music-bg.mp3" loop></audio>
+    <audio id="musicFinal" src="music-final.mp3"></audio>
+
+    <script>
+        /* PETALS */
+        let petalTimer = null;
+        function startPetals() {
+            petalTimer = setInterval(() => {
+                const p = document.createElement("div");
+                p.className = "petal";
+                p.textContent = "🌸";
+                p.style.left = Math.random() * 100 + "%";
+                p.style.animationDuration = (10 + Math.random() * 10) + "s";
+                stage.appendChild(p);
+                setTimeout(() => p.remove(), 20000);
+            }, 2500);
+        }
+
+        /* SUBTITLE + MUSIC CONTROL */
+        const lines = [
+            "2025 đã khiến em mệt mỏi rất nhiều.",
+            "Có những ngày em rơi nước mắt vì những chuyện không đáng có.",
+            "Có những cố gắng chẳng mang lại kết quả tốt đẹp nào.",
+            "Anh biết em đã mạnh mẽ đến thế nào khi vẫn tiếp tục bước đi.",
+            "Dù trong lòng không phải lúc nào cũng ổn.",
+            "Anh hy vọng 2026 sẽ là những hành trình mới mẻ hơn.",
+            "Nhẹ nhàng hơn.",
+            "Và dịu dàng với em hơn.",
+            "Và nếu trên những hành trình ấy…",
+            "Em cần một người chờ đợi.",
+            "Một người luôn lắng nghe.",
+            "Một người luôn muốn đồng hành cùng em.",
+            "Anh vẫn ở đây.",
+            "Không vội vàng.",
+            "Không ép buộc.",
+            "Chỉ là vẫn chờ — khi em sẵn sàng.",
+            "Anh yêu em. ❤️"
+        ];
+
+        let line = 0, char = 0;
+        const subtitle = document.getElementById("subtitle");
+        const textEl = document.getElementById("text");
+        const caret = document.getElementById("caret");
+        const bgMusic = document.getElementById("musicBg");
+        const finalMusic = document.getElementById("musicFinal");
+
+        const TYPE = 48, HOLD = 1800, FADE = 900;
+
+        function typeLine() {
+            if (char < lines[line].length) {
+                textEl.textContent += lines[line][char++];
+                setTimeout(typeLine, TYPE);
+            } else {
+                if (line === lines.length - 1) {
+                    caret.style.display = "none";
+                    subtitle.classList.add("show");
+                    bgMusic.pause();
+                    setTimeout(() => {
+                        finalMusic.volume = 0.7;
+                        finalMusic.play().catch(() => { });
+                    }, 3000);
+                    return;
+                }
+                setTimeout(() => {
+                    subtitle.classList.remove("show");
+                    setTimeout(nextLine, FADE);
+                }, HOLD);
+            }
+        }
+        function nextLine() {
+            line++; char = 0;
+            textEl.textContent = "";
+            subtitle.classList.add("show");
+            typeLine();
+        }
+
+        /* OPEN */
+        function openCard() {
+            document.getElementById("popup").classList.add("active");
+            startPetals();
+            bgMusic.volume = 0.4;
+            bgMusic.play().catch(() => { });
+            line = 0; char = 0;
+            textEl.textContent = "";
+            caret.style.display = "inline-block";
+            subtitle.classList.add("show");
+            typeLine();
+        }
+    </script>
+
+</body>
+
+</html>
