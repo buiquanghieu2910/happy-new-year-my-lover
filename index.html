@@ -401,9 +401,10 @@
                     subtitle.classList.add("show");
                     bgMusic.pause();
                     setTimeout(() => {
-                        finalMusic.volume = 0.7;
+                        finalMusic.volume = 1;
+                        finalMusic.currentTime = 0;
                         finalMusic.play().catch(() => { });
-                    }, 3000);
+                    }, 2000);
                     return;
                 }
                 setTimeout(() => {
@@ -426,6 +427,13 @@
             startPetals();
             bgMusic.volume = 0.4;
             bgMusic.play().catch(() => { });
+            finalMusic.volume = 0;
+            finalMusic.play()
+                .then(() => {
+                    finalMusic.pause();
+                    finalMusic.currentTime = 0;
+                })
+                .catch(() => { });
             line = 0; char = 0;
             textEl.textContent = "";
             caret.style.display = "inline-block";
