@@ -96,9 +96,7 @@ button{
     animation:fall linear infinite;
 }
 @keyframes fall{
-    to{
-        transform:translateY(120vh) rotate(360deg);
-    }
+    to{ transform:translateY(120vh) rotate(360deg); }
 }
 
 audio{display:none}
@@ -135,6 +133,11 @@ audio{display:none}
 <audio id="bg" src="music-bg.mp3" loop></audio>
 
 <script>
+/* ===== AUTO PLAY MUSIC (DESKTOP) ===== */
+const bg = document.getElementById("bg");
+bg.volume = 0.4;
+bg.play().catch(()=>{}); // desktop OK, mobile sẽ chờ user interaction
+
 /* ===== FIREWORKS ===== */
 const fw=document.getElementById("fireworks"),
 ctx=fw.getContext("2d");
@@ -231,7 +234,7 @@ function showSeq(arr,done){
             if(seq<arr.length)showSeq(arr,done);
             else done&&done();
         },600);
-    },3000);
+    },2000);
 }
 
 /* chỉ pháo hoa → 3s sau mới hiện intro */
@@ -245,7 +248,6 @@ setTimeout(()=>{
 /* ===== POPUP + PETALS ===== */
 const sub=document.getElementById("subtitle"),
 text=document.getElementById("text"),
-bg=document.getElementById("bg"),
 stage=document.getElementById("stage");
 
 const msg=[
@@ -302,6 +304,9 @@ function type(){
 }
 
 function openCard(){
+    // đảm bảo mobile bắt đầu phát nhạc
+    bg.play().catch(()=>{});
+
     document.getElementById("cover").style.display="none";
     document.getElementById("popup").classList.add("active");
 
@@ -309,7 +314,6 @@ function openCard(){
     ctx.clearRect(0,0,fw.width,fw.height);
 
     startPetals();
-    bg.volume=.4;bg.play().catch(()=>{});
 
     line=0;char=0;text.textContent="";
     sub.classList.add("show");
@@ -321,7 +325,6 @@ function closePopup(){
 
     stopPetals();
     fireworksRunning=true;
-    bg.pause();
 
     seq=0;
     showSeq(endLines);
